@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            overflow: hidden;
+        }
+
+        .weather-app {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        #get-weather:hover {
+            background-color: #6a11cb !important;
+            color: white !important;
+            box-shadow: 0 4px 15px rgba(106, 17, 203, 0.5);
+            transition: 0.3s;
+        }
+
+        .bubble {
+            position: absolute;
+            bottom: -50px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: floatUp 10s infinite ease-in-out;
+            filter: blur(2px);
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-100vh) scale(1.5); opacity: 0; }
+        }
+
+        footer {
+            margin-top: auto;
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: #6a11cb;
+            text-decoration: none;
+        }
+
+        footer a:hover { text-decoration: underline; }
+    </style>
+</head>
+
+<body>
+    <div class="bubble" style="left: 20%; width: 30px; height: 30px;"></div>
+    <div class="bubble" style="left: 50%; width: 50px; height: 50px;"></div>
+    <div class="bubble" style="left: 80%; width: 40px; height: 40px;"></div>
+
+    <div class="container mt-5">
+        <div class="weather-app card p-4 shadow">
+            <h2 class="text-center mb-4">Weather App</h2>
+            <div class="input-group mb-3">
+                <input type="text" id="city-input" class="form-control" placeholder="Enter city name">
+                <button id="get-weather" class="btn btn-primary">Get Weather</button>
+            </div>
+            <div id="weather-info" class="mt-4">
+                <p id="city" class="h5 text-primary text-center"></p>
+                <p id="temp" class="h6 text-center"></p>
+                <p id="description" class="text-center"></p>
+                <p id="humidity" class="text-center"></p>
+                <p id="wind" class="text-center"></p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2024 Weather App by <a href="https://example.com" target="_blank">Prakash Developer</a>. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        const apiKey = "196660a3ceab11a1b840e963cae647d1", weatherUrl = "https://api.openweathermap.org/data/2.5/weather";
+
+        document.getElementById("get-weather").addEventListener("click", () => {
+            const city = document.getElementById("city-input").value;
+            if (!city) return alert("Please enter a city name.");
+
+            fetch(`${weatherUrl}?q=${city}&units=metric&appid=${apiKey}`)
+                .then((response) => {
+                    if (!response.ok) throw new Error("City not found");
+                    return response.json();
+                })
+                .then((data) => {
+                    document.getElementById("city").textContent = `City: ${data.name}`;
+                    document.getElementById("temp").textContent = `Temperature: ${data.main.temp}°C`;
+                    document.getElementById("description").textContent = `Description: ${data.weather[0].description}`;
+                    document.getElementById("humidity").textContent = `Humidity: ${data.main.humidity}%`;
+                    document.getElementById("wind").textContent = `Wind Speed: ${data.wind.speed} m/s`;
+
+                    const weatherApp = document.querySelector(".weather-app");
+                    const description = data.weather[0].description.toLowerCase();
+                    const backgrounds = {
+                        clear: "linear-gradient(to right, #f6d365, #fda085)",
+                        cloud: "linear-gradient(to right, #bdc3c7, #2c3e50)",
+                        rain: "linear-gradient(to right, #00c6ff, #0072ff)",
+                        snow: "linear-gradient(to right, #e6f7ff, #cce7ff)",
+                        thunderstorm: "linear-gradient(to right, #373b44, #4286f4)",
+                        default: "linear-gradient(to right, #d3cce3, #e9e4f0)"
+                    };
+
+                    weatherApp.style.background = backgrounds[description.includes("clear") ? "clear" :
+                        description.includes("cloud") ? "cloud" :
+                        description.includes("rain") ? "rain" :
+                        description.includes("snow") ? "snow" :
+                        description.includes("thunderstorm") ? "thunderstorm" : "default"];
+
+                    gsap.fromTo("#weather-info p", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 1 });
+                })
+                .catch((error) => alert(error.message));
+        });
+    </script>
+</body>
+
+</html>
